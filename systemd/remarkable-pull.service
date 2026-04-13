@@ -1,0 +1,28 @@
+[Unit]
+Description=Pull notebooks from reMarkable and OCR to vault
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=gknayzeh
+Group=gknayzeh
+WorkingDirectory=/home/gknayzeh/dev/tools/remarkable-bridge
+ExecStart=/home/gknayzeh/dev/tools/remarkable-bridge/src/remarkable_pull_scheduled.sh
+
+# ntfy auth — G must fill in the password (same as alertmanager ntfy user)
+Environment="NTFY_URL=http://localhost:2586"
+Environment="NTFY_USER=g"
+Environment="NTFY_PASS="
+
+# Resource limits
+MemoryMax=4G
+TimeoutStartSec=1800
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=remarkable-pull
+
+[Install]
+WantedBy=multi-user.target

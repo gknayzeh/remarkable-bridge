@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+discovery/corpus/
+discovery/rendered-pages/
+discovery/results/
+discovery/pdf-test/output/

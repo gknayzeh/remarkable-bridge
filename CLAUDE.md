@@ -5,33 +5,25 @@ CLI tool for bidirectional sync between a Markdown notes vault and reMarkable
 tablets (rM2 + Paper Pro). Part of G's terminal-centric notes system.
 
 ## Current phase: R0 — Discovery
-Evaluating OCR engines and PDF rendering engines. See `discovery/`.
+Evaluating OCR engines and PDF rendering engines. See discovery/.
 
 ## Execution model
-All heavy work runs on this server (home server).
-- Non-sudo commands: run directly
-- Sudo commands: print for G to run manually
+All work runs on this home server.
+- Non-sudo: run directly
+- Sudo: print for G to run manually
 - Results rsync'd to laptop for interactive scoring
-
-## Project structure
-- discovery/corpus/ — PDFs pulled from reMarkable
-- discovery/ground-truth/ — pre-written source text
-- discovery/rendered-pages/ — PNGs from corpus (300 DPI)
-- discovery/results/{engine}/ — OCR output per engine
-- discovery/pdf-test/ — PDF rendering comparison
-- discovery/scores.json — OCR scoring data
-- discovery/DECISIONS.md — final engine selections
 
 ## Key tools
 - rmapi (ddvk fork) — reMarkable cloud CLI
-- ollama — local LLM inference
-- pandoc + typst — Markdown to PDF
-- pdftoppm (poppler-utils) — PDF to PNG
+- rmc + rmscene — v6 .rm file parser and renderer (SVG/PDF output)
+- rsvg-convert (librsvg2) — SVG to PNG
+- ollama — local LLM inference (RTX 3080 Max-Q, 16GB VRAM)
+- pandoc + typst — Markdown to PDF (for PDF engine comparison)
 - uv — Python package manager
 
-## Conventions
-- Python 3.12, managed by uv
-- PASS/FAIL gates — stop and report on FAIL
-
-## GPU
-RTX 3080 Max-Q (16GB VRAM). olmOCR-2 (~9GB Q8) fits. GLM-OCR (~1GB) trivial.
+## CRITICAL
+- rmapi geta is BROKEN — use rmapi get + rmc + rsvg-convert instead
+- rmc CLI: `rmc -t svg -o output.svg input.rm` (one .rm file per page)
+- Notebook zip structure: UUID.content (JSON with page list), UUID/page-uuid.rm
+- PASS/FAIL gates at each step — stop and report on FAIL
+- Do not run sudo commands — print them for G
