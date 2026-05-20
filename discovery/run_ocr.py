@@ -32,7 +32,16 @@ OLLAMA_MODELS = {
     "minicpm-v": "minicpm-v",
 }
 
-ALL_OLLAMA = {**LEGACY_MODELS, **OLLAMA_MODELS}
+# Round 3 (R1, 2026-05-20) — 2026-era VLMs benchmarked against the R0 6-case corpus.
+# Tier mix: two generalists (new architectures), two purpose-built document/OCR models.
+R1_MODELS = {
+    "qwen3-vl": "qwen3-vl:8b-instruct",
+    "gemma4": "gemma4:e4b",
+    "deepseek-ocr": "deepseek-ocr:3b",
+    "granite-vision": "granite3.2-vision:2b",
+}
+
+ALL_OLLAMA = {**LEGACY_MODELS, **OLLAMA_MODELS, **R1_MODELS}
 
 ADE_API_URL = "https://api.va.landing.ai/v1/ade/parse"
 
@@ -52,17 +61,36 @@ VISION_PROMPT = (
     "Output only the transcribed text as Markdown. Do not add commentary."
 )
 
+# Per-engine prompt overrides (R1, 2026-05-20). VISION_PROMPT's negative-
+# instruction tail mode-collapses some 2026-era models — they auto-complete
+# more "Do not..." clauses instead of transcribing. Override per-engine
+# rather than swapping the default, so R0 baselines (minicpm-v, llama-vision)
+# stay anchored to the prompt they were originally scored on.
+PROMPT_OVERRIDES = {
+    # deepseek-ocr:3b emits EOS immediately if the prompt mentions "Markdown"
+    # or "Preserve … structure" — likely a quirk of its document-OCR training
+    # distribution. This minimal prompt was verified empirically to produce
+    # well-structured markdown output on the corpus.
+    "deepseek-ocr": "Transcribe the handwritten text in this image. Output only the transcribed text.",
+}
+
+# Hard cap on generated tokens — defense-in-depth against any verbose / looping
+# model. One page of handwriting is typically <400 tokens; 1024 leaves headroom.
+NUM_PREDICT = 1024
+
 
 def encode_image(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("utf-8")
 
 
-def run_ollama(model: str, image_path: Path) -> tuple[str, float]:
+def run_ollama(engine: str, model: str, image_path: Path) -> tuple[str, float]:
+    prompt = PROMPT_OVERRIDES.get(engine, VISION_PROMPT)
     payload = {
         "model": model,
-        "prompt": VISION_PROMPT,
+        "prompt": prompt,
         "images": [encode_image(image_path)],
         "stream": False,
+        "options": {"num_predict": NUM_PREDICT},
     }
     start = time.monotonic()
     resp = httpx.post(
@@ -177,7 +205,7 @@ def main():
                 if args.engine == "ade":
                     text, elapsed = run_ade(page, args.ade_key)
                 else:
-                    text, elapsed = run_ollama(ALL_OLLAMA[args.engine], page)
+                    text, elapsed = run_ollama(args.engine, ALL_OLLAMA[args.engine], page)
                 tc_texts.append(text)
                 tc_timings.append({"page": page.name, "seconds": round(elapsed, 2)})
                 print(f"{elapsed:.1f}s")

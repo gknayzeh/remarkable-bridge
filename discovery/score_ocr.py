@@ -23,7 +23,18 @@ DIMENSIONS = [
     ("edge_cases", "Math, code, diagrams, symbols"),
 ]
 
-ENGINES = ["olmocr2", "glm-ocr", "remarkable-builtin"]
+ENGINES = [
+    "olmocr2",
+    "glm-ocr",
+    "remarkable-builtin",
+    # R0 baseline (re-pulled for R1 comparison)
+    "minicpm-v",
+    # R1 (2026-05-20)
+    "qwen3-vl",
+    "gemma4",
+    "deepseek-ocr",
+    "granite-vision",
+]
 
 
 def clear_screen():
