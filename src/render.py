@@ -71,8 +71,12 @@ def extract_notebook_pages(
                 print(f"  Warning: page {i} render failed ({e}), skipping")
                 continue
 
-            # SVG to PNG with white background
-            _svg_to_png(svg_path, png_path)
+            # rsvg/Cairo has a hard 16-bit (32767px) per-dimension cap; skip oversized pages.
+            try:
+                _svg_to_png(svg_path, png_path)
+            except RuntimeError as e:
+                print(f"  Warning: page {i} rasterize failed ({e}), skipping")
+                continue
 
             # Flatten RGBA to RGB with white background (matches R0 flatten_png.py)
             _flatten_png(png_path)
