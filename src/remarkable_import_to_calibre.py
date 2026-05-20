@@ -246,6 +246,9 @@ def main():
         print(f"\nDone. {imported} imported, {skipped} skipped, {errors} errors.")
         print(f"DB: {stats['total']} books ({stats['pushed']} pushed)")
 
+        if errors:
+            sys.exit(1)
+
     finally:
         db.close()
 

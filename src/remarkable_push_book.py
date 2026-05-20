@@ -404,6 +404,8 @@ def main():
             print(f"\nDone. {linked} linked, {already} already in DB, {unmatched} unmatched.")
             print(f"DB: {stats['total']} books ({stats['pushed']} pushed, "
                   f"{stats['with_progress']} with progress)")
+            if unmatched:
+                sys.exit(1)
             return
 
         # ─── Push mode ───────────────────────────────────────
@@ -471,6 +473,9 @@ def main():
         print(f"\nDone. {pushed}/{len(valid)} pushed, {errors} errors.")
         print(f"DB: {stats['total']} books ({stats['pushed']} pushed, "
               f"{stats['with_progress']} with progress)")
+
+        if errors:
+            sys.exit(1)
     finally:
         db.close()
 

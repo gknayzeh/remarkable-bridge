@@ -328,7 +328,7 @@ def sync_progress(
         rm_books = list_rm_books("/books")
     except RuntimeError as e:
         print(f"ERROR: cannot list reMarkable books: {e}")
-        return 0, 0
+        return 0, 1
 
     # Build name-based index (cheaper than stat-ing every book)
     rm_name_index = {b["name"].lower(): b for b in rm_books}
@@ -499,6 +499,9 @@ def main():
         print(f"\nDone. {synced} synced, {errors} errors.")
         print(f"DB: {stats['total']} books ({stats['pushed']} pushed, "
               f"{stats['with_progress']} with progress)")
+
+        if errors:
+            sys.exit(1)
     finally:
         db.close()
 

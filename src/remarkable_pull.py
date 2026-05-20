@@ -553,6 +553,9 @@ def main():
         stats = db.stats()
         print(f"\nDB: {stats['total']} docs ({stats['local_origin']} local, "
               f"{stats['remarkable_origin']} rM, {stats['mapped_to_rm']} mapped)")
+
+        if errors:
+            sys.exit(1)
     finally:
         db.close()
 

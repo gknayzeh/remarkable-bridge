@@ -245,6 +245,7 @@ def main():
 
         print(f"Pushing {len(files)} note(s) to {args.rm_folder} [{args.profile}]")
         pushed = 0
+        errors = 0
         for md_path in files:
             try:
                 if push_note(
@@ -254,12 +255,16 @@ def main():
                     pushed += 1
             except Exception as e:
                 print(f"\n  ERROR: {md_path.name}: {e}")
+                errors += 1
 
         # Print stats
         stats = db.stats()
-        print(f"\nDone. {pushed}/{len(files)} pushed.")
+        print(f"\nDone. {pushed}/{len(files)} pushed, {errors} errors.")
         print(f"DB: {stats['total']} docs ({stats['local_origin']} local, "
               f"{stats['remarkable_origin']} rM, {stats['pushed']} pushed)")
+
+        if errors:
+            sys.exit(1)
     finally:
         db.close()
 
