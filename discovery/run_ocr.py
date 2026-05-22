@@ -72,6 +72,19 @@ PROMPT_OVERRIDES = {
     # distribution. This minimal prompt was verified empirically to produce
     # well-structured markdown output on the corpus.
     "deepseek-ocr": "Transcribe the handwritten text in this image. Output only the transcribed text.",
+    # gemma4:e4b fabricates canonical-textbook content under VISION_PROMPT
+    # (e.g. wrote "$S nodes / $F failures" for a Raft consensus page that
+    # actually shows "5 nodes / 2 failures"). This anti-fabrication prompt
+    # kills the substitution. The explicit diagram clause recovers the
+    # arrow-structure inference that an earlier verbatim-only variant broke
+    # (gemma4 was producing flat run-on strings for service-flow diagrams).
+    # See discovery/R1-comparison.md and the R1b iteration commit message.
+    "gemma4": (
+        "Transcribe the handwritten text on this page verbatim. "
+        "Preserve the exact numbers, variables, and symbols that appear in the handwriting. "
+        "For diagrams with arrows, list each labeled connection on its own line, in the order they appear. "
+        "Output only the transcription."
+    ),
 }
 
 # Hard cap on generated tokens — defense-in-depth against any verbose / looping

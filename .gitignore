@@ -3,4 +3,5 @@ __pycache__/
 discovery/corpus/
 discovery/rendered-pages/
 discovery/results/
+discovery/results-*/
 discovery/pdf-test/output/
